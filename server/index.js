@@ -50,26 +50,27 @@ app.post("/createemployee",(req,res)=>{
     });
 })
 
-
-app.post("/employees",(req,res)=>{
+//create an employee record
+app.post("/newemployee",(req,res)=>{
     const {name,email,designation} = req.body;
 
-    db.query("INSERT INTO employee (name,email,designation) VALUES (?,?,?)",[name,email,designation], (error,res) => {
+    db.query("INSERT INTO employee (name,email,designation) VALUES (?,?,?)",[name,email,designation], (error,result) => {
         if (error) {
             console.error('Error creating employee record:', error);
             res.status(500).json({ error });
             return;
         }
-        res.json({ id: result.insertId });
+        res.json({id : result.insertId});
     });
-});
+})
 
+//update an employee record
 app.put('/employees/:id', (req, res) => {
     const { name, email, designation} = req.body;
     const { id } = req.params;
   
-    connection.query(
-      'UPDATE employees SET name = ?, email = ?, designation = ? WHERE id = ?',
+    db.query(
+      'UPDATE employee SET name = ?, email = ?, designation = ? WHERE id = ?',
       [name, email, designation, id],
       (error) => {
         if (error) {
@@ -81,6 +82,32 @@ app.put('/employees/:id', (req, res) => {
       }
     );
   });
+
+//read all employee records
+app.get('/employees',(req,res)=>{
+    db.query('SELECT * FROM employee',(err,results)=>{
+        if(err){
+            console.error('error fetching all employee details:',err);
+            res.status(500).json({err});
+            return;
+        }
+        res.json(results);
+    });
+})  
+
+//delete an employee record
+app.delete('/delemployees/:id',(req,res)=>{
+    const {id} = req.params;
+
+    db.query('DELETE FROM employee WHERE id = ?',[id],(err)=>{
+        if(err){
+            console.error('error deleting employee');
+            res.status(500).json({err});
+            return;
+        }
+        res.json({success : true});
+    })
+})
 
 app.listen(5000,(err) => {
     if (err) {
